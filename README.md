@@ -1,6 +1,6 @@
 # battleship
 
-A C++ implementation of the game _Battleship_, which can be played by 2 players over LAN. 
+A C++ implementation of the game _Battleship_, which can be played by 2 players over LAN on the terminal. 
 Networking is done using the C++ Boost Asio library, and the game is implemented using OOP.
 
 ## Legend
