@@ -32,3 +32,9 @@ X      | Miss
 
 * C++ 11
 * Boost.Asio - for networking
+
+
+## TODO
+
+* save/load support
+* 1P version v/s AI (Reinforcement learning agent)
