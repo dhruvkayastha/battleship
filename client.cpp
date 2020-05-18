@@ -17,12 +17,14 @@ string read(tcp::socket& socket)
     boost::asio::streambuf buf;
     boost::asio::read_until(socket, buf, "\n");
     string data = boost::asio::buffer_cast<const char*>(buf.data());
+    data.pop_back();
     return data;
 }
 
 void send(tcp::socket &socket, const string& _data)
 {
     const string data = _data + "\n";
+    // cout << "Sending: " << data << endl;
     boost::asio::write(socket, boost::asio::buffer(data));
 }
 
@@ -76,14 +78,15 @@ int main()
 
         string status;
         if(game.defend(x, y))
-            status = "hit";
-        else
             status = "miss";
+        else
+            status = "hit";
 
         game.display();
         
         send(socket, status);
-
+        if(game.isOver())
+            break;
         //attack
         cout << "Enter target coordinate (or enter q to quit): " << endl;
         char cx;
@@ -109,6 +112,6 @@ int main()
         game.display();
     }
     game.showStats();
-   
+    socket.close();
     return 0;  
 }  

@@ -182,27 +182,28 @@ BattleshipGame::BattleshipGame(int size=10)
     turn = 1;
     board = Board(size);
     BOARD_SIZE = size;
-    remaining = vector<int>(2);
+    remaining = vector<int>(2, 18);
     num_moves = vector<int>(2);
 }
 
-void BattleshipGame::setup(int player_no)
+void BattleshipGame::setup(int player_no_)
 {
-    cout << "Setting up Board for Player " << player_no + 1 << endl;
+    cout << "Setting up Board for Player " << player_no_ + 1 << endl;
     // Board* board = board;
     board.placeShip(5);
     board.placeShip(4);
     board.placeShip(4);
     board.placeShip(3);
     board.placeShip(2);
+    player_no = player_no_;
     remaining[player_no] = 18;
-    this->player_no = player_no;
 }
 
 void BattleshipGame::display()
 {
     // int player_no = turn - 1;
-    cout << "Player " << player_no + 1<< endl;
+    if(player_no <=1)
+        cout << "Player " << player_no + 1<< endl;
     cout << "Target Board" << endl;
     board.display("targets");
     cout << "Shipyard" << endl;
@@ -263,8 +264,8 @@ int BattleshipGame::getWinner()
     if(isOver())
     {
         if(remaining[0] == 0)
-            return 1;
-        else return 2;
+            return 2;
+        else return 1;
     }
     else
     {
@@ -407,13 +408,14 @@ bool BattleshipGame::attack(int x, int y, bool hit)
     if(hit)
     {
         board.targets[x][y] = 'H';
-        cout << "Hit Target at " << char('A' + x) << char('A' + y) << "!" << endl;
+        cout << player_no << endl;
         remaining[1-player_no]--;
+        cout << "Hit Target at " << char('A' + x) << char('A' + y) << "!" << endl;
     }
     else
     {
         board.targets[x][y] = 'X';
-        cout << "Shot at " << char('A' + x) << char('A' + y) << "..." << endl;
+        cout << "Shot missed at " << char('A' + x) << char('A' + y) << "..." << endl;
     }
     num_moves[player_no]++;
     return hit;

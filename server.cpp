@@ -17,12 +17,15 @@ string read(tcp::socket& socket)
     boost::asio::streambuf buf;
     boost::asio::read_until(socket, buf, "\n");
     string data = boost::asio::buffer_cast<const char*>(buf.data());
+    cout << "Read: " << data << endl;
+    data.pop_back();
     return data;
 }
 
 void send(tcp::socket &socket, const string& _data)
 {
     const string data = _data + "\n";
+    cout << "Sending: " << data << endl;
     boost::asio::write(socket, boost::asio::buffer(data));
 }
 
@@ -34,7 +37,6 @@ int main()
     acceptor.accept(socket);  
     
     string data = read(socket);
-    data.pop_back();
 
     cout << data << endl;
 
@@ -102,7 +104,8 @@ int main()
             game.attack(x, y, false);
         game.display();
         // defend
-
+        if(game.isOver())
+            break;
         cout << "Waiting for opponent to play" << endl;
 
         string x_str = read(socket);
@@ -112,9 +115,9 @@ int main()
         y = std::stoi(y_str);
 
         if(game.defend(x, y))
-            status = "hit";
-        else
             status = "miss";
+        else
+            status = "hit";
 
         send(socket, status);
 
@@ -122,6 +125,6 @@ int main()
         game.display();
     }
     game.showStats();
-    
+    socket.close();
     return 0;  
 }  

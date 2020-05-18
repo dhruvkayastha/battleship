@@ -17,6 +17,7 @@ protected:
     string game_name;
     int num_players;
     int turn;
+    int player_no;
 public:
     void display();
     void setup(int player_no);
@@ -49,7 +50,7 @@ class BattleshipGame : public Game
     // vector<Board> boards;
     Board board;
 
-    int player_no;
+    // int player_no;
 
     vector<int> remaining;
     vector<int> num_moves;
@@ -58,7 +59,7 @@ public:
     // BattleshipGame();
     BattleshipGame(int size);
 
-    void setup(int player_no);
+    void setup(int player_no_);
 
     void display();
 
