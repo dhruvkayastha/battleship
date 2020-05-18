@@ -1,7 +1,7 @@
 #include "battleship.h"
 #include <boost/asio.hpp>
 
-#define PLAYER 0
+#define PLAYER 1
 #define PORT 2020
 
 using namespace boost::asio;
@@ -29,48 +29,50 @@ void send(tcp::socket &socket, const string& _data)
 int main() 
 {  
     boost::asio::io_service io_service;  
-    tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), PORT));  
     tcp::socket socket(io_service);  
-    acceptor.accept(socket);  
-    
-    string data = read(socket);
-    data.pop_back();
+    socket.connect(tcp::endpoint(ip::address::from_string("127.0.0.1"), PORT));
 
-    cout << data << endl;
+    int pid = getpid();
 
-    cout << "Welcome to Battleship!" << endl;
-    cout << "1: New game\n2: Load game\n3: Exit" << endl;
-    cout << "Choose option: ";
-    int type;
-    cin >> type;
+    string connect_msg = "Client (pid: " + std::to_string(pid) + ") connected";
+
+    send(socket, connect_msg);
+
+    cout << "Waiting for server to start game..." << endl;
+
     BattleshipGame game = BattleshipGame(10);
-    if(type == 1)
+
+    string reply = read(socket);
+    string saveFile;
+    if(reply == "load")
     {
-        send(socket, "new");
-        game.setup(PLAYER);
-    }
-    else if(type == 2)
-    {
-        cout << "Enter save filename: ";
-        string saveFile;
-        cin >> saveFile;
+        saveFile = read(socket);
         game.load(saveFile, PLAYER);
-        send(socket, "load");
-        send(socket, saveFile);
-    }
-    else if(type == 3)
-    {
-        exit(1);
     }
     else
     {
-        cout << "Invalid input" << endl;
-        exit(1);
+        game.setup(PLAYER);
     }
-    
     game.display();
     while(!game.isOver())
     {
+        cout << "Waiting for opponent to play" << endl;
+        string x_str = read(socket);
+        string y_str = read(socket);
+
+        int x = std::stoi(x_str);
+        int y = std::stoi(y_str);
+
+        string status;
+        if(game.defend(x, y))
+            status = "hit";
+        else
+            status = "miss";
+
+        game.display();
+        
+        send(socket, status);
+
         //attack
         cout << "Enter target coordinate (or enter q to quit): " << endl;
         char cx;
@@ -82,38 +84,20 @@ int main()
             break;
         }
         cin >> cy;
-        int x = cx - 'A', y = cy - 'A';
+        x = cx - 'A';
+        y = cy - 'A';
         
         send(socket, std::to_string(x));
         send(socket, std::to_string(y));
 
-        string status = read(socket);
+        status = read(socket);
         if(status == "hit")
             game.attack(x, y, true);
         else
             game.attack(x, y, false);
         game.display();
-        // defend
-
-        cout << "Waiting for opponent to play" << endl;
-
-        string x_str = read(socket);
-        string y_str = read(socket);
-
-        x = std::stoi(x_str);
-        y = std::stoi(y_str);
-
-        if(game.defend(x, y))
-            status = "hit";
-        else
-            status = "miss";
-
-        send(socket, status);
-
-        // cout << flush;
-        game.display();
     }
     game.showStats();
-    
+   
     return 0;  
 }  
