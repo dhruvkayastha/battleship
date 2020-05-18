@@ -47,6 +47,7 @@ int main()
     if(type == 1)
     {
         send(socket, "new");
+        game.display();
         game.setup(PLAYER);
     }
     else if(type == 2)
@@ -65,6 +66,13 @@ int main()
     else
     {
         cout << "Invalid input" << endl;
+        exit(1);
+    }
+    send(socket, "done");
+    string reply = read(socket);
+    if(reply != "done")
+    {
+        cout << "Synchronization error" << endl;
         exit(1);
     }
     

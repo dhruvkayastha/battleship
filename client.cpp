@@ -51,8 +51,19 @@ int main()
     }
     else
     {
+        game.display();
         game.setup(PLAYER);
     }
+
+    send(socket, "done");
+    reply = read(socket);
+    if(reply != "done")
+    {
+        cout << "Synchronization error" << endl;
+        exit(1);
+    }
+
+
     game.display();
     while(!game.isOver())
     {
